@@ -7,12 +7,17 @@ import { Button } from '@material-ui/core'
 class Main extends React.Component {
   constructor(props){
     super(props)
+    let alphabet = []
+    for (let i = 0; i < 26; i++){
+      alphabet.push(String.fromCharCode(i+65))
+    }
     this.state = {
       cipher: 'Vigenere',
       plainText:'',
       key:'',
       encryptedText:'',
       decryptedText:'',
+      alphabetConfig:alphabet,
       encryptionMode:true
     }
   }
@@ -87,14 +92,26 @@ class Main extends React.Component {
     })
   }
 
+  handleAlphabetConfigChange = event => {
+    this.setState({
+      alphabetConfig:event.target.value
+    })
+  }
+
+  shuffleAlphabetConfig = () => {
+    const { alphabetConfig } = this.state
+    let shuffledAlphabet = alphabetConfig.sort(() => Math.random() - 0.5)
+    this.setState({
+      alphabetConfig: shuffledAlphabet
+    })
+  }
+
   encrypt = () => {
-    const { cipher, key, plainText } = this.state
-    let tempKey
-    let temp
+    const { cipher, key, plainText, alphabetConfig } = this.state
+    let tempKey, temp
     switch(cipher) {
       case 'Vigenere':
         temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
-        console.log(temp)
         tempKey = key.toUpperCase().trim()
         for (let i = 0; i < temp.length; i++){
           temp[i] = String.fromCharCode((((temp[i].charCodeAt(0) - 65) + (tempKey[i % tempKey.length].charCodeAt(0) - 65)) % 26) + 65) 
@@ -104,13 +121,23 @@ class Main extends React.Component {
           encryptedText: temp
         })
         break
-      case 'Full Vigenere':
-        
+      case 'Full Vigenere':   
+        console.log(plainText)
+        temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
+        tempKey = key.toUpperCase().trim()
+        for (let i = 0; i < temp.length; i++){
+          temp[i] = alphabetConfig[((alphabetConfig.indexOf(temp[i]) + alphabetConfig.indexOf(tempKey[i % tempKey.length])) % 26)]
+          console.log(((alphabetConfig.indexOf(temp[i]) + alphabetConfig.indexOf(tempKey[i])) % 26))
+          console.log("---------------------------")
+        }
+        temp = temp.join('')
+        this.setState({
+          encryptedText: temp
+        })
         break
       case 'Auto Key Vigenere':
         temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
         tempKey = key.replace(/ /g,'').concat(plainText.substr(0,(temp.length-key.length)-1))
-        console.log(temp)
         for (let i = 0; i < temp.length; i++){
           temp[i] = String.fromCharCode((((temp[i].charCodeAt(0) - 65) + (tempKey[i % tempKey.length].charCodeAt(0) - 65)) % 26) + 65) 
         }
@@ -121,17 +148,12 @@ class Main extends React.Component {
         })
         break
       case 'Extended Vigenere':
+        
         temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
-        console.log(temp)
         tempKey = key.toUpperCase().trim()
         for (let i = 0; i < temp.length; i++){
-          temp[i] = String.fromCharCode((((temp[i].charCodeAt(0)) + (tempKey[i % tempKey.length].charCodeAt(0))) % 256)) 
-          console.log(temp[i].charCodeAt(0))
-          console.log("---------------------------")
-          console.log((((temp[i].charCodeAt(0)) + (tempKey[i % tempKey.length].charCodeAt(0))) % 256))
-        }
+          temp[i] = String.fromCharCode((((temp[i].charCodeAt(0)) + (tempKey[i % tempKey.length].charCodeAt(0))) % 256))        }
         temp = temp.join('')
-        console.log(temp)
         this.setState({
           encryptedText: temp
         })
@@ -152,7 +174,7 @@ class Main extends React.Component {
     }
   }
   decrypt = () => {
-    const { cipher, key, encryptedText } = this.state
+    const { cipher, key, encryptedText, alphabetConfig } = this.state
     let temp, tempKey
     switch(cipher) {
       case 'Vigenere':
@@ -170,7 +192,15 @@ class Main extends React.Component {
         })
         break
       case 'Full Vigenere':
-
+        temp = encryptedText.replace(/ /g,'').trim().toUpperCase().split('')
+        tempKey = key.toUpperCase().trim()
+        for (let i = 0; i < temp.length; i++){
+          temp[i] = alphabetConfig[((((alphabetConfig.indexOf(temp[i]) - alphabetConfig.indexOf(tempKey[i % tempKey.length])) % 26) + 26) % 26)]
+        }
+        temp = temp.join('')
+        this.setState({
+          decryptedText: temp
+        })
         break
       case 'Auto Key Vigenere':
         temp = encryptedText.toUpperCase().trim().split('')
@@ -215,6 +245,20 @@ class Main extends React.Component {
     }
   }
 
+  AlphabetConfig = () => {
+    const { alphabetConfig, cipher } = this.state
+    const config = alphabetConfig.join('')
+    return cipher === 'Full Vigenere' ? (
+      <Grid container direction="row">
+        <TextField style={{width:"75%"}} label="Alphabet configuration..."value={config} onChange={this.handleAlphabetConfigChange}>
+        </TextField>
+        <Button onClick={this.shuffleAlphabetConfig}>
+          Randomize
+        </Button>
+      </Grid>
+    ) : null
+  }
+
   render(){
     const { cipher, encryptionMode, encryptedText, decryptedText, plainText, key } = this.state
 
@@ -242,6 +286,9 @@ class Main extends React.Component {
           <Grid item xs={12}>
             <TextField onChange={encryptionMode ? this.handlePlainChange : this.handleEncryptedChange} value={encryptionMode ? plainText : encryptedText} style={{width:"100%"}} label={encryptionMode ? "Enter plaintext here..." : "Enter encrypted text here"}></TextField>
           </Grid>
+          <Grid item xs={12}>
+            <this.AlphabetConfig/>
+          </Grid>
           <Grid item xs={12}>  
             <TextField onChange={this.handleKeyChange} value={key} style={{width:"100%"}} label="Enter key here..."></TextField>
           </Grid>
@@ -251,6 +298,7 @@ class Main extends React.Component {
           <Grid itex xs={12}>
             <Button onClick={encryptionMode ? this.encrypt : this.decrypt}>{encryptionMode ? "Encrypt" : "Decrypt"}</Button>
           </Grid>
+          
         </Grid>
       </div>
     )
