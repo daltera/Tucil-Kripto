@@ -22,7 +22,9 @@ class Main extends React.Component {
       a:'',
       b:'',
       encryptionMatrix:'',
-      decryptionMatrix:''
+      decryptionMatrix:'',
+      shift:'',
+      partition:''
     }
   }
   encryptionType = [
@@ -114,6 +116,18 @@ class Main extends React.Component {
     })
   }
 
+  handleShiftChange = event => {
+    this.setState({
+      shift:event.target.value
+    })
+  }
+
+  handlePartitionChange = event => {
+    this.setState({
+      partition:event.target.value
+    })
+  }
+
   shuffleAlphabetConfig = () => {
     const { alphabetConfig } = this.state
     let shuffledAlphabet = alphabetConfig.sort(() => Math.random() - 0.5)
@@ -176,7 +190,45 @@ class Main extends React.Component {
     
         break
       case 'Super':
-  
+        const { shift, partition } = this.state
+        temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
+        tempKey = key.toUpperCase().trim()
+        for (let i = 0; i < temp.length; i++){
+          temp[i] = String.fromCharCode((((temp[i].charCodeAt(0) - 65) + parseInt(shift)) % 26) + 65) 
+        }
+        console.log(temp)
+        let temporaryContainer = []
+        const rowNumber = Math.ceil(temp.length / partition);
+        for (let i = 0; i < rowNumber; i++){
+          temporaryContainer.push([])
+        }
+        let j = 0
+        for (let i = 0; i < temp.length; i++){
+          console.log(temporaryContainer[j].length)
+          if (temporaryContainer[j].length === parseInt(partition)) {
+            
+            j++
+          }
+          temporaryContainer[j].push(temp[i])
+        }
+        console.log(temporaryContainer)
+        let k = 0
+        for (let j = 0; j < parseInt(partition); j++){
+          for (let i = 0; i < rowNumber; i++){
+            temp[k] = temporaryContainer[i][j]
+            if (k === temp.length){
+              break
+            }
+            k++    
+          }
+          if (k === temp.length) {
+            break
+          }
+        }
+        temp = temp.join('')
+        this.setState({
+          encryptedText: temp
+        })
         break
       case 'Affine':
         const { a, b } = this.state
@@ -260,7 +312,38 @@ class Main extends React.Component {
     
         break
       case 'Super':
-  
+        const { partition, shift } = this.state
+        temp = encryptedText.replace(/ /g,'').trim().toUpperCase().split('')
+        let rowNumber = Math.ceil(encryptedText.length / partition)
+        let temporaryContainer = []
+        for (let i = 0; i < rowNumber; i++) {
+          temporaryContainer.push([])
+        }
+        let i = 0
+        for (let j = 0; j < temp.length; j++) {
+          temporaryContainer[i].push(temp[j])
+          i++
+          if (i === rowNumber) {
+            i = 0
+          }
+        }
+        let newTemp = []
+        for (let i = 0; i < rowNumber; i++) {
+          for (let j = 0; j < parseInt(partition); j++){
+            newTemp.push(temporaryContainer[i][j])
+          }
+        }
+
+        for (let i = 0; i < newTemp.length; i++){
+          newTemp[i] = String.fromCharCode((((((newTemp[i].charCodeAt(0) - 65) - parseInt(shift)) % 26) + 26) % 26) + 65) 
+        }
+        
+        newTemp = newTemp.join('')
+        console.log(newTemp)
+        this.setState({
+          decryptedText: newTemp
+        })
+
         break
       case 'Affine':
         const { a, b } = this.state
@@ -304,6 +387,8 @@ class Main extends React.Component {
     ) : null
   }
 
+
+
   AffineUtils = () => {
     const { b, a, cipher } = this.state
     return cipher === 'Affine' ? (
@@ -320,9 +405,9 @@ class Main extends React.Component {
     const { shift, partition, cipher } = this.state
     return cipher === 'Super' ? (
       <Grid container direction="row">
-        <TextField style={{width:"75%"}} label="Enter your shift..." value={a} onChange={this.handleAChange}>
+        <TextField style={{width:"75%"}} onChange={this.handleShiftChange} label="Enter your shift..." value={shift}>
         </TextField>
-        <TextField style={{width:"75%"}} label="Enter your partition..." value={b} onChange={this.handleBChange}>
+        <TextField style={{width:"75%"}} onChange={this.handlePartitionChange} label="Enter your partition..." value={partition}>
         </TextField>
       </Grid>
     ) : null
@@ -358,9 +443,10 @@ class Main extends React.Component {
           <Grid item xs={12}>
             <this.AlphabetConfig/>
             <this.AffineUtils/>
+            <this.SuperUtils/>
           </Grid>
           <Grid item xs={12}>  
-            {cipher !== "Affine" ? (<TextField onChange={this.handleKeyChange} value={key} style={{width:"100%"}} label="Enter key here..."></TextField>) : null}
+            {cipher !== "Affine" && cipher !== "Super" ? (<TextField onChange={this.handleKeyChange} value={key} style={{width:"100%"}} label="Enter key here..."></TextField>) : null}
           </Grid>
           <Grid item xs={12}>
             <TextField value={encryptionMode ? encryptedText : decryptedText}style={{width:"100%"}} label={encryptionMode ? "Encrypted result..." : "Decryption result..."} disabled></TextField>
