@@ -215,11 +215,15 @@ class Main extends React.Component {
         let k = 0
         for (let j = 0; j < parseInt(partition); j++){
           for (let i = 0; i < rowNumber; i++){
-            temp[k] = temporaryContainer[i][j]
+            console.log(temporaryContainer[i][j])
+            if (temporaryContainer[i][j] !== undefined){
+              temp[k] = temporaryContainer[i][j]
+              k++  
+            }
             if (k === temp.length){
               break
             }
-            k++    
+              
           }
           if (k === temp.length) {
             break
@@ -327,14 +331,26 @@ class Main extends React.Component {
             i = 0
           }
         }
+
+        for (let i = 0; i < rowNumber-1; i++){
+          if (temporaryContainer[i].length < parseInt(partition)){
+            temporaryContainer[i].push(temporaryContainer[rowNumber-1][temporaryContainer[rowNumber-1].length-1])
+            delete temporaryContainer[rowNumber-1][temporaryContainer[rowNumber-1].length-1]
+          }
+        }
+
+        console.log(temporaryContainer)
         let newTemp = []
         for (let i = 0; i < rowNumber; i++) {
           for (let j = 0; j < parseInt(partition); j++){
-            newTemp.push(temporaryContainer[i][j])
+            if (temporaryContainer[i][j] !== undefined){
+              newTemp.push(temporaryContainer[i][j])
+            }
           }
         }
 
         for (let i = 0; i < newTemp.length; i++){
+          console.log(newTemp)
           newTemp[i] = String.fromCharCode((((((newTemp[i].charCodeAt(0) - 65) - parseInt(shift)) % 26) + 26) % 26) + 65) 
         }
         
