@@ -71,12 +71,24 @@ class Main extends React.Component {
   }
 
   handleModeChange = (event) => {
+    let alphabet = []
+    for (let i = 0; i < 26; i++){
+      alphabet.push(String.fromCharCode(i+65))
+    }
     this.setState({
-      encryptionMode:!this.state.encryptionMode,
-      encryptedText:'',
-      decryptedText:'',
-      plainText:'',
-      key:''
+        cipher: 'Vigenere',
+        plainText:'',
+        key:'',
+        encryptedText:'',
+        decryptedText:'',
+        alphabetConfig:alphabet,
+        encryptionMode:!this.state.encryptionMode,
+        a:'',
+        b:'',
+        encryptionMatrix:'',
+        decryptionMatrix:'',
+        shift:'',
+        partition:''
     })
   }
 
@@ -176,8 +188,8 @@ class Main extends React.Component {
         })
         break
       case 'Extended Vigenere':
-        temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
-        tempKey = key.toUpperCase().trim()
+        temp = plainText.replace(/ /g,'').trim().split('')
+        tempKey = key.trim().replace(/ /g, '')
         for (let i = 0; i < temp.length; i++){
           temp[i] = String.fromCharCode((((temp[i].charCodeAt(0)) + (tempKey[i % tempKey.length].charCodeAt(0))) % 256))        
         }
@@ -300,9 +312,9 @@ class Main extends React.Component {
         })
         break
       case 'Extended Vigenere':
-        temp = encryptedText.replace(/ /g,'').trim().toUpperCase().split('')
+        temp = encryptedText.replace(/ /g,'').trim().split('')
         console.log(temp)
-        tempKey = key.toUpperCase().trim()
+        tempKey = key.trim().replace(/ /g,'')
         for (let i = 0; i < temp.length; i++){
           temp[i] = String.fromCharCode(((((temp[i].charCodeAt(0)) - (tempKey[i % tempKey.length].charCodeAt(0))) % 256)+256)%256) 
        }
