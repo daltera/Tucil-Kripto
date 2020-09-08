@@ -165,9 +165,9 @@ class Main extends React.Component {
         break
       case 'Auto Key Vigenere':
         temp = plainText.replace(/ /g,'').trim().toUpperCase().split('')
-        tempKey = key.replace(/ /g,'').concat(plainText.substr(0,(temp.length-key.length)-1))
+        tempKey = key.replace(/ /g,'').trim().concat(plainText.substr(0,(temp.length-key.length))).toUpperCase()
         for (let i = 0; i < temp.length; i++){
-          temp[i] = String.fromCharCode((((temp[i].charCodeAt(0) - 65) + (tempKey[i % tempKey.length].charCodeAt(0) - 65)) % 26) + 65) 
+          temp[i] = String.fromCharCode((((temp[i].charCodeAt(0) - 65) + (tempKey[i].charCodeAt(0) - 65)) % 26) + 65) 
         }
         temp = temp.join('')
         this.setState({
