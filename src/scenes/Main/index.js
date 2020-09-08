@@ -224,6 +224,91 @@ class Main extends React.Component {
         });
         break;
       case "Playfair":
+        let alphabet = [];
+        for (let i = 0; i < 26; i++) {
+          alphabet.push(String.fromCharCode(i + 65));
+        }
+
+        temp = plainText
+          .replace(/ /g, "")
+          .trim()
+          .toUpperCase()
+          .replace(/J/g, "I")
+          .split("");
+        console.log("Temp: ", temp);
+
+        //5x5 Table as single dimension array
+        // div as row, mod as column
+        tempKey = key
+          .trim()
+          .toUpperCase()
+          .split("")
+          .concat(alphabet)
+          .filter(function (item, i, ar) {
+            return ar.indexOf(item) === i;
+          })
+          .filter(function (e) {
+            return e !== "J";
+          });
+        console.log("TempKey: ", tempKey);
+
+        //Create 5x5 key table
+        let keyMatrix = [
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+        ];
+
+        let iter = 0;
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 5; j++) {
+            keyMatrix[i][j] = tempKey[iter];
+            iter++;
+          }
+        }
+        console.log("keyMatrix: ", keyMatrix);
+
+        iter = 0;
+        let firstIDX = 0;
+        let secondIDX = 0;
+        let cipherText = "";
+
+        while (iter < temp.length) {
+          //Getting the tuple
+          firstIDX = tempKey.indexOf(temp[iter]);
+          if (temp[iter + 1]) {
+            secondIDX = tempKey.indexOf(temp[iter + 1]);
+          } else {
+            secondIDX = tempKey.indexOf("X");
+          }
+
+          let cipher1 = "";
+          let cipher2 = "";
+          if (Math.floor(firstIDX / 5) === Math.floor(secondIDX / 5)) {
+            cipher1 =
+              keyMatrix[Math.floor(firstIDX / 5)][((firstIDX % 5) + 1) % 5];
+            cipher2 =
+              keyMatrix[Math.floor(secondIDX / 5)][((secondIDX % 5) + 1) % 5];
+          } else if (firstIDX % 5 === secondIDX % 5) {
+            cipher1 = keyMatrix[Math.floor(firstIDX / 5 + 1) % 5][firstIDX % 5];
+            cipher2 =
+              keyMatrix[Math.floor(secondIDX / 5 + 1) % 5][secondIDX % 5];
+          } else {
+            cipher1 = keyMatrix[Math.floor(firstIDX / 5)][secondIDX % 5];
+            cipher2 = keyMatrix[Math.floor(secondIDX / 5)][firstIDX % 5];
+          }
+
+          cipherText = cipherText.concat(cipher1);
+          cipherText = cipherText.concat(cipher2);
+
+          iter = iter + +2;
+        }
+        console.log("Cipher Text: ", cipherText);
+        this.setState({
+          encryptedText: cipherText,
+        });
         break;
       case "Super":
         const { shift, partition } = this.state;
@@ -311,6 +396,7 @@ class Main extends React.Component {
           for (let i = 0; i < 26; i++) {
             alphabet.push(String.fromCharCode(i + 65));
           }
+
           for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
               // matrixKey.set(i, j, alphabet.indexOf(tempKey[k]));
@@ -495,6 +581,91 @@ class Main extends React.Component {
         });
         break;
       case "Playfair":
+        let alphabet = [];
+        for (let i = 0; i < 26; i++) {
+          alphabet.push(String.fromCharCode(i + 65));
+        }
+
+        temp = encryptedText
+          .replace(/ /g, "")
+          .trim()
+          .toUpperCase()
+          .replace(/J/g, "I")
+          .split("");
+        console.log("Temp: ", temp);
+
+        //5x5 Table as single dimension array
+        // div as row, mod as column
+        tempKey = key
+          .trim()
+          .toUpperCase()
+          .split("")
+          .concat(alphabet)
+          .filter(function (item, i, ar) {
+            return ar.indexOf(item) === i;
+          })
+          .filter(function (e) {
+            return e !== "J";
+          });
+        console.log("TempKey: ", tempKey);
+
+        //Create 5x5 key table
+        let keyMatrix = [
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+          ["A", "A", "A", "A", "A"],
+        ];
+
+        let iter = 0;
+        for (let i = 0; i < 5; i++) {
+          for (let j = 0; j < 5; j++) {
+            keyMatrix[i][j] = tempKey[iter];
+            iter++;
+          }
+        }
+        console.log("keyMatrix: ", keyMatrix);
+
+        iter = 0;
+        let firstIDX = 0;
+        let secondIDX = 0;
+        let cipherText = "";
+
+        while (iter < temp.length) {
+          //Getting the tuple
+          firstIDX = tempKey.indexOf(temp[iter]);
+          if (temp[iter + 1]) {
+            secondIDX = tempKey.indexOf(temp[iter + 1]);
+          } else {
+            secondIDX = tempKey.indexOf("X");
+          }
+
+          let cipher1 = "";
+          let cipher2 = "";
+          if (Math.floor(firstIDX / 5) === Math.floor(secondIDX / 5)) {
+            cipher1 =
+              keyMatrix[Math.floor(firstIDX / 5)][((firstIDX % 5) + 4) % 5];
+            cipher2 =
+              keyMatrix[Math.floor(secondIDX / 5)][((secondIDX % 5) + 4) % 5];
+          } else if (firstIDX % 5 === secondIDX % 5) {
+            cipher1 = keyMatrix[Math.floor(firstIDX / 5 + 4) % 5][firstIDX % 5];
+            cipher2 =
+              keyMatrix[Math.floor(secondIDX / 5 + 4) % 5][secondIDX % 5];
+          } else {
+            cipher1 = keyMatrix[Math.floor(firstIDX / 5)][secondIDX % 5];
+            cipher2 = keyMatrix[Math.floor(secondIDX / 5)][firstIDX % 5];
+          }
+
+          cipherText = cipherText.concat(cipher1);
+          cipherText = cipherText.concat(cipher2);
+
+          iter = iter + +2;
+        }
+        console.log("Cipher Text: ", cipherText);
+        this.setState({
+          decryptedText: cipherText,
+        });
         break;
       case "Super":
         const { partition, shift } = this.state;
