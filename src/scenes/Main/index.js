@@ -72,6 +72,26 @@ class Main extends React.Component {
     });
   };
 
+  handleSeparateClicker = () => {
+    const {encryptedText} = this.state
+    let arr = encryptedText.split("")
+    let chunk = 5
+    let newContainer = []
+    let lastidx = 0
+    for (let i = 0; i < arr.length;  i += chunk){
+        let tempArray = arr.slice(i, i+chunk)
+        console.log(tempArray)
+        tempArray = tempArray.join("")
+        newContainer.push(tempArray)
+        lastidx = i
+    }
+    arr = arr.slice(lastidx+chunk).join("")
+    newContainer.push(arr)
+    this.setState({
+      encryptedText:newContainer
+    })
+    }
+
   handleModeChange = (event) => {
     let alphabet = [];
     for (let i = 0; i < 26; i++) {
@@ -1007,9 +1027,12 @@ class Main extends React.Component {
               disabled
             ></TextField>
           </Grid>
-          <Grid itex xs={12}>
+          <Grid item container xs={12} direction="row">
             <Button onClick={encryptionMode ? this.encrypt : this.decrypt}>
               {encryptionMode ? "Encrypt" : "Decrypt"}
+            </Button>
+            <Button onClick={this.handleSeparateClicker}>
+              Split 5 Ciphertext
             </Button>
           </Grid>
         </Grid>
