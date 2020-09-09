@@ -74,24 +74,26 @@ class Main extends React.Component {
   };
 
   handleSeparateClicker = () => {
-    const {encryptedText} = this.state
-    let arr = encryptedText.split("")
-    let chunk = 5
-    let newContainer = []
-    let lastidx = 0
-    for (let i = 0; i < arr.length;  i += chunk){
-        let tempArray = arr.slice(i, i+chunk)
-        console.log(tempArray)
-        tempArray = tempArray.join("")
-        newContainer.push(tempArray)
-        lastidx = i
+    const { encryptedText } = this.state;
+    let arr = encryptedText.replace(/ /g, "").split("");
+    let chunk = 5;
+    let newContainer = [];
+    let lastidx = 0;
+    for (let i = 0; i < arr.length; i += chunk) {
+      let tempArray = arr.slice(i, i + chunk);
+      console.log(tempArray);
+      tempArray = tempArray.join("");
+      newContainer.push(tempArray);
+      lastidx = i;
     }
-    arr = arr.slice(lastidx+chunk).join("")
-    newContainer.push(arr)
+    arr = arr.slice(lastidx + chunk).join("");
+    newContainer.push(arr);
+    // newContainer.join(" ");
+    // console.log(newContainer.join(" "));
     this.setState({
-      encryptedText:newContainer
-    })
-    }
+      encryptedText: newContainer.join(" "),
+    });
+  };
 
   handleUploadFile = async (e) => {
     const reader = new FileReader();
@@ -110,7 +112,6 @@ class Main extends React.Component {
     };
     reader.readAsText(e.target.files[0]);
   };
-
 
   handleModeChange = (event) => {
     let alphabet = [];
@@ -519,7 +520,7 @@ class Main extends React.Component {
             encryptedText: cipherText,
           });
         } else {
-          console.log("Errpr! Key not 9 digit");
+          console.log("Error! Key not 9 digit");
         }
         break;
       default:
@@ -909,7 +910,7 @@ class Main extends React.Component {
             decryptedText: cipherText,
           });
         } else {
-          console.log("Errpr! Key not 9 digit");
+          console.log("Error! Key not 9 digit");
         }
         break;
       default:
