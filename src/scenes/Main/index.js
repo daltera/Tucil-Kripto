@@ -81,7 +81,6 @@ class Main extends React.Component {
     let lastidx = 0;
     for (let i = 0; i < arr.length; i += chunk) {
       let tempArray = arr.slice(i, i + chunk);
-      console.log(tempArray);
       tempArray = tempArray.join("");
       newContainer.push(tempArray);
       lastidx = i;
@@ -111,6 +110,26 @@ class Main extends React.Component {
       }
     };
     reader.readAsText(e.target.files[0]);
+  };
+
+  handleRandomFile = async (e) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      let res = e.target.result;
+      let view = new Uint8Array(res);
+      console.log(view);
+
+      if (!this.encryptionMode) {
+        this.setState({
+          uploadedFile: view,
+        });
+      } else {
+        this.setState({
+          uploadedFile: view,
+        });
+      }
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
   };
 
   handleModeChange = (event) => {
@@ -193,7 +212,7 @@ class Main extends React.Component {
   };
 
   encrypt = () => {
-    const { cipher, key, plainText, alphabetConfig } = this.state;
+    const { cipher, key, plainText, alphabetConfig, uploadedFile } = this.state;
     let tempKey, temp;
     switch (cipher) {
       case "Vigenere":
@@ -251,19 +270,54 @@ class Main extends React.Component {
         });
         break;
       case "Extended Vigenere":
-        temp = plainText.replace(/ /g, "").trim().split("");
-        tempKey = key.trim().replace(/ /g, "");
-        for (let i = 0; i < temp.length; i++) {
-          temp[i] = String.fromCharCode(
-            (temp[i].charCodeAt(0) +
-              tempKey[i % tempKey.length].charCodeAt(0)) %
-              256
-          );
+        if (uploadedFile) {
+          temp = uploadedFile;
+          tempKey = key.trim().replace(/ /g, "");
+          for (let i = 0; i < temp.length; i++) {
+            temp[i] = String(
+              (temp[i] + tempKey[i % tempKey.length].charCodeAt(0)) % 256
+            );
+          }
+          console.log("Temp: ", temp);
+
+          //create download
+          let saveFile = (function () {
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            return function (temp, name) {
+              let blob = new Blob([temp], {
+                type: "application/octet-stream",
+              });
+              let url = window.URL.createObjectURL(blob);
+              a.href = url;
+              a.download = name;
+              a.click();
+              window.URL.revokeObjectURL(url);
+            };
+          })();
+
+          saveFile(temp, "Encrypted");
+
+          temp = temp.join(" ");
+          this.setState({
+            encryptedText: temp,
+          });
+        } else {
+          temp = plainText.replace(/ /g, "").trim().split("");
+          tempKey = key.trim().replace(/ /g, "");
+          for (let i = 0; i < temp.length; i++) {
+            temp[i] = String.fromCharCode(
+              (temp[i].charCodeAt(0) +
+                tempKey[i % tempKey.length].charCodeAt(0)) %
+                256
+            );
+          }
+          temp = temp.join("");
+          this.setState({
+            encryptedText: temp,
+          });
         }
-        temp = temp.join("");
-        this.setState({
-          encryptedText: temp,
-        });
         break;
       case "Playfair":
         let alphabet = [];
@@ -530,7 +584,13 @@ class Main extends React.Component {
   };
 
   decrypt = () => {
-    const { cipher, key, encryptedText, alphabetConfig } = this.state;
+    const {
+      cipher,
+      key,
+      encryptedText,
+      alphabetConfig,
+      uploadedFile,
+    } = this.state;
     let temp, tempKey;
     switch (cipher) {
       case "Vigenere":
@@ -604,23 +664,59 @@ class Main extends React.Component {
         });
         break;
       case "Extended Vigenere":
-        temp = encryptedText.replace(/ /g, "").trim().split("");
-        console.log(temp);
-        tempKey = key.trim().replace(/ /g, "");
-        for (let i = 0; i < temp.length; i++) {
-          temp[i] = String.fromCharCode(
-            (((temp[i].charCodeAt(0) -
-              tempKey[i % tempKey.length].charCodeAt(0)) %
-              256) +
-              256) %
-              256
-          );
+        if (uploadedFile) {
+          temp = uploadedFile;
+          tempKey = key.trim().replace(/ /g, "");
+          for (let i = 0; i < temp.length; i++) {
+            temp[i] = String(
+              (((temp[i] - tempKey[i % tempKey.length].charCodeAt(0)) % 256) +
+                256) %
+                256
+            );
+          }
+
+          //create download
+          let saveFile = (function () {
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+            return function (temp, name) {
+              let blob = new Blob([temp], {
+                type: "application/octet-stream",
+              });
+              let url = window.URL.createObjectURL(blob);
+              a.href = url;
+              a.download = name;
+              a.click();
+              window.URL.revokeObjectURL(url);
+            };
+          })();
+
+          saveFile(temp, "Decrypted");
+
+          temp = temp.join(" ");
+          this.setState({
+            decryptedText: temp,
+          });
+        } else {
+          temp = encryptedText.replace(/ /g, "").trim().split("");
+          console.log(temp);
+          tempKey = key.trim().replace(/ /g, "");
+          for (let i = 0; i < temp.length; i++) {
+            temp[i] = String.fromCharCode(
+              (((temp[i].charCodeAt(0) -
+                tempKey[i % tempKey.length].charCodeAt(0)) %
+                256) +
+                256) %
+                256
+            );
+          }
+          temp = temp.join("");
+          console.log(temp);
+          this.setState({
+            decryptedText: temp,
+          });
         }
-        temp = temp.join("");
-        console.log(temp);
-        this.setState({
-          decryptedText: temp,
-        });
         break;
       case "Playfair":
         let alphabet = [];
@@ -1008,6 +1104,8 @@ class Main extends React.Component {
               ))}
             </TextField>
           </Grid>
+          <br></br>
+          Text File:
           <Grid item xs={3}>
             <input
               type="file"
@@ -1016,6 +1114,16 @@ class Main extends React.Component {
               onChange={this.handleUploadFile}
             ></input>
           </Grid>
+          Arbitrary File:
+          <Grid item xs={3}>
+            <input
+              type="file"
+              id="text"
+              className="file"
+              onChange={this.handleRandomFile}
+            ></input>
+          </Grid>
+          <br></br>
           <Grid item xs={12}>
             <TextField
               onChange={
