@@ -26,6 +26,7 @@ class Main extends React.Component {
       decryptionMatrix: "",
       shift: "",
       partition: "",
+      uploadedFile: null,
     };
   }
 
@@ -92,6 +93,25 @@ class Main extends React.Component {
     })
     }
 
+  handleUploadFile = async (e) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      let textRes = e.target.result;
+      console.log(textRes);
+      if (!this.encryptionMode) {
+        this.setState({
+          plainText: textRes,
+        });
+      } else {
+        this.setState({
+          encryptedText: textRes,
+        });
+      }
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+
+
   handleModeChange = (event) => {
     let alphabet = [];
     for (let i = 0; i < 26; i++) {
@@ -111,6 +131,7 @@ class Main extends React.Component {
       decryptionMatrix: "",
       shift: "",
       partition: "",
+      uploadedFile: null,
     });
   };
 
@@ -985,6 +1006,14 @@ class Main extends React.Component {
                 </MenuItem>
               ))}
             </TextField>
+          </Grid>
+          <Grid item xs={3}>
+            <input
+              type="file"
+              id="text"
+              className="file"
+              onChange={this.handleUploadFile}
+            ></input>
           </Grid>
           <Grid item xs={12}>
             <TextField
